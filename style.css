@@ -36,6 +36,7 @@ body {
     overflow-x: hidden;
 }
 
+
 /* ============================================ */
 /* ====== هدر ================================= */
 /* ============================================ */
@@ -92,6 +93,7 @@ nav {
     color: var(--purple);
 }
 
+
 /* ============================================ */
 /* ====== بخش قهرمان ========================== */
 /* ============================================ */
@@ -120,6 +122,7 @@ nav {
     color: var(--text-muted);
     font-size: 1rem;
 }
+
 
 /* ============================================ */
 /* ====== بخش مقالات ========================== */
@@ -152,6 +155,7 @@ nav {
 .section-title span {
     color: var(--purple);
 }
+
 
 /* ============================================ */
 /* ====== نوار جستجو ========================== */
@@ -225,6 +229,7 @@ nav {
     background: rgba(167, 139, 250, 0.15);
     color: var(--purple);
 }
+
 
 /* ============================================ */
 /* ====== کارت‌های مقاله ====================== */
@@ -322,6 +327,7 @@ nav {
     border-top: 1px solid var(--border);
 }
 
+
 /* ============================================ */
 /* ====== حالت‌های خالی ======================= */
 /* ============================================ */
@@ -333,6 +339,7 @@ nav {
     font-size: 0.95rem;
     grid-column: 1 / -1;
 }
+
 
 /* ============================================ */
 /* ====== فوتر ================================ */
@@ -347,30 +354,388 @@ footer {
     margin-top: 2rem;
 }
 
+
 /* ============================================ */
-/* ====== ریسپانسیو =========================== */
+/* ====== صفحه ورود ادمین ===================== */
 /* ============================================ */
 
-@media (max-width: 600px) {
-    header { padding: 0.8rem 1rem; }
-    .hero { padding: 3rem 1rem 1rem; }
-    .hero h1 { font-size: 2.2rem; }
-    .articles { padding: 1rem 1rem 3rem; }
-    .section-title { font-size: 1.4rem; }
-    
-    .articles-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1rem;
-    }
-    
-    .search-box {
-        max-width: none;
-        width: 100%;
-    }
+.auth-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
 }
+
+.auth-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(124, 92, 214, 0.15);
+}
+
+.auth-box h2 {
+    font-family: 'Lalezar', cursive;
+    font-size: 1.8rem;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.auth-sub {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 2rem;
+}
+
+
 /* ============================================ */
-/* ====== صفحه مقاله =========================== */
+/* ====== فرم‌ها ============================== */
+/* ============================================ */
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem 1rem;
+    color: var(--text);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--purple-deep);
+    box-shadow: 0 0 0 3px rgba(124, 92, 214, 0.15);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 200px;
+    line-height: 1.9;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+
+/* ============================================ */
+/* ====== دکمه‌ها ============================= */
+/* ============================================ */
+
+.btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--purple-deep), var(--purple));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.95rem;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-top: 0.5rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(124, 92, 214, 0.35);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-ghost:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+
+/* ============================================ */
+/* ====== پیام‌ها ============================= */
+/* ============================================ */
+
+.form-error {
+    color: #e07080;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 1rem;
+    min-height: 1.2em;
+}
+
+.form-success {
+    color: #6ec98a;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 1rem;
+    min-height: 1.2em;
+}
+
+
+/* ============================================ */
+/* ====== پنل ادمین =========================== */
+/* ============================================ */
+
+.admin-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.admin-header h2 {
+    font-family: 'Lalezar', cursive;
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.editor-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.editor-box h3 {
+    font-family: 'Lalezar', cursive;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+    color: var(--purple);
+}
+
+
+/* ============================================ */
+/* ====== ردیف مقاله در ادمین ================ */
+/* ============================================ */
+
+.admin-article-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+}
+
+.admin-article-row:last-child {
+    border-bottom: none;
+}
+
+.admin-article-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+}
+
+.admin-article-info strong {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.admin-article-info small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+
+/* ============================================ */
+/* ====== آپلود عکس ========================== */
+/* ============================================ */
+
+.image-upload {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: var(--bg);
+}
+
+.image-upload:hover {
+    border-color: var(--purple);
+    background: rgba(124, 92, 214, 0.05);
+}
+
+.upload-placeholder {
+    color: var(--text-muted);
+}
+
+.upload-placeholder span {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.upload-placeholder p {
+    font-size: 0.85rem;
+}
+
+#image-preview-wrap {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+#image-preview {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 10px;
+    display: block;
+}
+
+.btn-remove-image {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(224, 112, 128, 0.9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+
+/* ============================================ */
+/* ====== ردیف دکمه‌ها ======================== */
+/* ============================================ */
+
+.btn-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.btn-row .btn-primary {
+    flex: 1;
+    margin-top: 0;
+}
+
+
+/* ============================================ */
+/* ====== دکمه‌های ویرایش/حذف ================= */
+/* ============================================ */
+
+.btn-edit {
+    background: transparent;
+    border: 1px solid var(--purple-deep);
+    color: var(--purple);
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-edit:hover {
+    background: rgba(167, 139, 250, 0.1);
+}
+
+.btn-delete {
+    background: transparent;
+    border: 1px solid #4a2030;
+    color: #e07080;
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-delete:hover {
+    background: rgba(224, 112, 128, 0.1);
+    border-color: #e07080;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+
+/* ============================================ */
+/* ====== تامبنیل مقاله در ادمین ============== */
+/* ============================================ */
+
+.admin-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+}
+
+.admin-thumb.no-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    font-size: 1.5rem;
+    color: var(--text-muted);
+}
+
+
+/* ============================================ */
+/* ====== صفحه مقاله ========================== */
 /* ============================================ */
 
 .article-page {
@@ -379,7 +744,6 @@ footer {
     padding: 2rem 2rem 4rem;
 }
 
-/* ====== دکمه بازگشت ====== */
 .back-link {
     display: inline-flex;
     align-items: center;
@@ -401,10 +765,6 @@ footer {
     border-color: var(--purple-deep);
 }
 
-/* ============================================ */
-/* ====== عکس کاور با فید به بک‌گراند ========== */
-/* ============================================ */
-
 .article-cover {
     width: 100%;
     aspect-ratio: 16 / 9;
@@ -413,7 +773,6 @@ footer {
     position: relative;
     margin-bottom: 2rem;
     background: var(--bg-card);
-    /* ماسک فید به بک‌گراند */
     -webkit-mask-image: linear-gradient(
         to bottom,
         #000 0%,
@@ -437,10 +796,6 @@ footer {
     display: block;
 }
 
-/* ============================================ */
-/* ====== بدنه مقاله =========================== */
-/* ============================================ */
-
 .article-body {
     padding: 0 0.25rem;
 }
@@ -453,7 +808,6 @@ footer {
     margin-bottom: 2rem;
 }
 
-/* ====== دسته‌بندی شیشه‌ای ====== */
 .article-tag {
     display: inline-block;
     font-size: 0.75rem;
@@ -468,7 +822,6 @@ footer {
     letter-spacing: 0.3px;
 }
 
-/* ====== عنوان مقاله ====== */
 .article-title {
     font-family: 'Lalezar', cursive;
     font-size: 2.2rem;
@@ -479,7 +832,6 @@ footer {
     margin: 0;
 }
 
-/* ====== تاریخ ====== */
 .article-date {
     font-size: 0.75rem;
     color: var(--text-muted);
@@ -487,7 +839,6 @@ footer {
     letter-spacing: 0.2px;
 }
 
-/* ====== متن مقاله ====== */
 .article-content {
     font-size: 1rem;
     line-height: 2.1;
@@ -505,10 +856,6 @@ footer {
     margin-bottom: 0;
 }
 
-/* ============================================ */
-/* ====== خطای مقاله ========================== */
-/* ============================================ */
-
 .article-error {
     text-align: center;
     padding: 4rem 1rem;
@@ -520,26 +867,40 @@ footer {
     margin-bottom: 1.5rem;
 }
 
+
 /* ============================================ */
 /* ====== ریسپانسیو =========================== */
 /* ============================================ */
 
 @media (max-width: 600px) {
-    .article-page {
-        padding: 1.5rem 1rem 3rem;
+    header { padding: 0.8rem 1rem; }
+    .hero { padding: 3rem 1rem 1rem; }
+    .hero h1 { font-size: 2.2rem; }
+    .articles { padding: 1rem 1rem 3rem; }
+    .section-title { font-size: 1.4rem; }
+
+    .articles-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
     }
 
-    .article-cover {
-        border-radius: 14px;
-        margin-bottom: 1.5rem;
+    .search-box {
+        max-width: none;
+        width: 100%;
     }
 
-    .article-title {
-        font-size: 1.6rem;
+    .form-row { grid-template-columns: 1fr; }
+    .editor-box { padding: 1.5rem; }
+    .auth-box { padding: 2rem 1.5rem; }
+
+    .admin-article-row {
+        flex-direction: column;
+        align-items: stretch;
     }
 
-    .article-content {
-        font-size: 0.95rem;
-        line-height: 2;
-    }
+    .article-page { padding: 1.5rem 1rem 3rem; }
+    .article-cover { border-radius: 14px; margin-bottom: 1.5rem; }
+    .article-title { font-size: 1.6rem; }
+    .article-content { font-size: 0.95rem; line-height: 2; }
 }
