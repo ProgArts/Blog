@@ -294,7 +294,7 @@ async function loadAdminArticles() {
 
     const { data, error } = await supabaseClient
         .from('articles')
-        .select('*')
+        .select('id, title, tag, cover_url, created_at, expires_at, views, likes')
         .order('created_at', { ascending: false });
 
     if (error) {
@@ -310,7 +310,7 @@ async function loadAdminArticles() {
     list.innerHTML = data.map(a => `
         <div class="admin-article-row">
             ${a.cover_url 
-                ? `<img src="${a.cover_url}" class="admin-thumb" alt="">` 
+                ? `<img src="${a.cover_url}" class="admin-thumb" alt="" loading="lazy" decoding="async">` 
                 : `<div class="admin-thumb no-img">📄</div>`}
             <div class="admin-article-info">
                 <span class="card-tag">${escapeHtml(a.tag || 'عمومی')}</span>
