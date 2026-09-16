@@ -27,7 +27,7 @@ function showLogin() {
 function showAdminPanel() {
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('admin-view').style.display = 'block';
-    cleanupExpired();          // 👈 پاک‌سازی مقاله‌های منقضی
+    cleanupExpired();
     loadAdminArticles();
 }
 
@@ -318,6 +318,8 @@ async function loadAdminArticles() {
                 <small>
                     ${formatDate(a.created_at)}
                     ${a.expires_at ? ' • انقضا: ' + formatDate(a.expires_at) : ' • بدون انقضا'}
+                    • 👁 ${a.views || 0}
+                    • ❤️ ${a.likes || 0}
                 </small>
             </div>
             <div class="admin-actions">
