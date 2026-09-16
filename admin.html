@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل ادمین | پروگ آرت</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html" class="logo">پروگ آرت</a>
+            <ul class="nav-links">
+                <li><a href="index.html">خانه</a></li>
+                <li><a href="admin.html">پنل ادمین</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- صفحه ورود -->
+    <section class="auth-section" id="login-view">
+        <div class="auth-box">
+            <h2>ورود ادمین</h2>
+            <p class="auth-sub">فقط مدیر سایت می‌تواند وارد شود</p>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label>ایمیل</label>
+                    <input type="email" id="email" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label>رمز عبور</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn-primary" id="login-btn">ورود</button>
+                <p class="form-error" id="login-error"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- پنل ادمین -->
+    <section class="admin-section" id="admin-view" style="display: none;">
+        
+        <div class="admin-header">
+            <h2>پنل ادمین</h2>
+            <button class="btn-ghost" id="logout-btn">خروج</button>
+        </div>
+
+        <!-- فرم نوشتن/ویرایش مقاله -->
+        <div class="editor-box">
+            <h3 id="editor-title">مقاله جدید</h3>
+
+            <form id="article-form">
+                <input type="hidden" id="edit-id" value="">
+
+                <div class="form-group">
+                    <label>عنوان</label>
+                    <input type="text" id="title" required placeholder="عنوان مقاله...">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>دسته‌بندی</label>
+                        <input type="text" id="tag" placeholder="مثلاً: برنامه‌نویسی" value="عمومی">
+                    </div>
+
+                    <div class="form-group">
+                        <label>حذف خودکار بعد از</label>
+                        <select id="expires">
+                            <option value="7">۷ روز</option>
+                            <option value="30" selected>۳۰ روز</option>
+                            <option value="90">۹۰ روز</option>
+                            <option value="365">۱ سال</option>
+                            <option value="0">هیچ‌وقت</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- آپلود عکس -->
+                <div class="form-group">
+                    <label>عکس کاور (اختیاری)</label>
+                    <div class="image-upload" id="image-upload-box">
+                        <input type="file" id="image-input" accept="image/*" hidden>
+                        
+                        <div id="image-preview-wrap" style="display: none;">
+                            <img id="image-preview" alt="پیش‌نمایش">
+                            <button type="button" class="btn-remove-image" id="remove-image">حذف عکس</button>
+                        </div>
+                        
+                        <div id="image-placeholder" class="upload-placeholder">
+                            <span>📷</span>
+                            <p>برای انتخاب عکس کلیک کن</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>متن مقاله</label>
+                    <textarea id="content" required rows="12" placeholder="متن مقاله‌ات را اینجا بنویس..."></textarea>
+                </div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn-primary" id="publish-btn">🚀 انتشار مقاله</button>
+                    <button type="button" class="btn-ghost" id="cancel-edit-btn" style="display: none;">لغو ویرایش</button>
+                </div>
+
+                <p class="form-success" id="publish-success"></p>
+                <p class="form-error" id="publish-error"></p>
+            </form>
+        </div>
+
+        <!-- لیست مقاله‌ها -->
+        <div class="editor-box">
+            <h3>مقاله‌های منتشرشده</h3>
+            <div id="admin-articles-list">
+                <p class="loading">در حال بارگذاری...</p>
+            </div>
+        </div>
+
+    </section>
+
+    <footer>
+        <p>© ۱۴۰۴ پروگ آرت</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+    <script src="admin.js"></script>
+
+</body>
+</html>s
