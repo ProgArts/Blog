@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>چت روم | پروگ آرت</title>
+    <meta name="description" content="چت روم پروگ آرت">
+    
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/lalezar-font@v1.0.0/dist/font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html" class="logo">پروگ آرت</a>
+            <ul class="nav-links">
+                <li><a href="index.html">خانه</a></li>
+                <li><a href="chat.html">چت روم</a></li>
+                <li><a href="admin.html">پنل ادمین</a></li>
+            </ul>
+            <button class="theme-toggle" id="theme-toggle" aria-label="تغییر تم">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <main class="chat-page">
+        
+        <div class="chat-header">
+            <h1>💬 چت روم</h1>
+            <p>با بقیه کاربران پروگ آرت گپ بزن</p>
+            <div class="chat-status" id="chat-status">
+                <span class="status-dot"></span>
+                <span id="status-text">در حال اتصال...</span>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <p class="loading">در حال بارگذاری پیام‌ها...</p>
+            </div>
+
+            <form class="chat-form" id="chat-form">
+                <div class="chat-form-row">
+                    <input 
+                        type="text" 
+                        id="chat-username" 
+                        placeholder="اسمت..."
+                        maxlength="20"
+                        required
+                    >
+                </div>
+                <div class="chat-form-row chat-form-main">
+                    <input 
+                        type="text" 
+                        id="chat-input" 
+                        placeholder="پیامت رو بنویس..."
+                        maxlength="500"
+                        autocomplete="off"
+                        required
+                    >
+                    <button type="submit" class="chat-send-btn" id="chat-send" aria-label="ارسال">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>© ۱۴۰۴ پروگ آرت</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+    <script src="chat.js"></script>
+
+</body>
+</html>

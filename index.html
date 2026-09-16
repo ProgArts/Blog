@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پروگ آرت | Prog Arts</title>
+    <meta name="description" content="پروگ آرت - جایی که کد و هنر به هم می‌رسند">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="index.html" class="logo">پروگ آرت</a>
+            <ul class="nav-links">
+                <li><a href="index.html">خانه</a></li>
+                <li><a href="admin.html">پنل ادمین</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>پروگ <span>آرت</span></h1>
+        <p>جایی که کد و هنر به هم می‌رسند</p>
+    </section>
+
+    <section class="articles">
+        
+        <div class="articles-header">
+            <h2 class="section-title">آخرین <span>مقالات</span></h2>
+            
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="جستجو در مقالات..."
+                    autocomplete="off"
+                >
+                <button type="button" class="search-clear" id="search-clear" style="display: none;">
+                    ✕
+                </button>
+            </div>
+        </div>
+
+        <div class="cards-grid" id="articles-list">
+            <p class="loading">در حال بارگذاری...</p>
+        </div>
+
+    </section>
+
+    <footer>
+        <p>© ۱۴۰۴ پروگ آرت</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>
