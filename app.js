@@ -132,7 +132,6 @@ function applyFilters() {
         return true;
     });
 
-    // مرتب‌سازی
     if (currentSort === 'newest') {
         filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     } else if (currentSort === 'oldest') {
