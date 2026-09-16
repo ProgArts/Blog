@@ -47,7 +47,6 @@ async function loadArticle() {
 
     document.title = `${data.title} | پروگ آرت`;
 
-    // افزایش بازدید
     incrementViews(id, data.views || 0);
 
     const paragraphs = (data.content || '')
@@ -172,7 +171,6 @@ function setupLike(id, currentLikes, isLiked) {
         const newLiked = !liked;
         const newLikes = newLiked ? likes + 1 : likes - 1;
 
-        // آپدیت UI فوری
         liked = newLiked;
         likes = newLikes;
         countEl.textContent = newLikes;
@@ -184,7 +182,6 @@ function setupLike(id, currentLikes, isLiked) {
             localStorage.removeItem('liked-' + id);
         }
 
-        // آپدیت دیتابیس
         try {
             await supabaseClient
                 .from('articles')
@@ -211,7 +208,6 @@ function setupShare() {
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
 
-        // اگه Web Share API داشت، استفاده کن
         if (navigator.share) {
             navigator.share({
                 title: document.title,
@@ -251,14 +247,23 @@ function setupReadingProgress() {
     const bar = document.getElementById('reading-progress');
     if (!bar) return;
 
+    let ticking = false;
+
     function updateProgress() {
         const scrollTop = window.scrollY;
         const docHeight = document.documentElement.scrollHeight - window.innerHeight;
         const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
         bar.style.width = progress + '%';
+        ticking = false;
     }
 
-    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            window.requestAnimationFrame(updateProgress);
+            ticking = true;
+        }
+    }, { passive: true });
+
     updateProgress();
 }
 
@@ -268,7 +273,6 @@ function setupReadingProgress() {
 // ============================================
 
 function setupFocusMode() {
-    // دکمه شناور
     const btn = document.createElement('button');
     btn.className = 'focus-toggle';
     btn.setAttribute('aria-label', 'حالت مطالعه');
