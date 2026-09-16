@@ -1,296 +1,327 @@
 // ============================================
-// ====== بارگذاری مقاله ======================
+// ====== تنظیمات Supabase ====================
 // ============================================
 
-async function loadArticle() {
-    const page = document.getElementById('article-page');
-    if (!page) return;
+const SUPABASE_URL = 'https://zhyzduzuikleolzpftvv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_WlVeHTmhCtxrD5Ae-TILog_6H4I0BP_';
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    if (!id) {
-        page.innerHTML = `
-            <div class="article-error">
-                <p>مقاله پیدا نشد 😕</p>
-                <a href="index.html" class="back-link">← بازگشت به خانه</a>
-            </div>
-        `;
-        return;
+
+// ============================================
+// ====== تم شب/روز ===========================
+// ============================================
+
+function initTheme() {
+    const saved = localStorage.getItem('progarts-theme');
+    let theme = saved;
+
+    if (!theme) {
+        const hour = new Date().getHours();
+        theme = (hour >= 7 && hour < 19) ? 'light' : 'dark';
     }
+
+    document.documentElement.setAttribute('data-theme', theme);
+
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.addEventListener('click', toggleTheme);
+    }
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('progarts-theme', next);
+}
+
+initTheme();
+
+
+// ============================================
+// ====== ذخیره مقاله‌ها در حافظه =============
+// ============================================
+
+let allArticles = [];
+let currentCategory = 'همه';
+let currentSort = 'newest';
+
+
+// ============================================
+// ====== بارگذاری مقاله‌ها ====================
+// ============================================
+
+async function loadArticles() {
+    const list = document.getElementById('articles-list');
+    if (!list) return;
+
+    list.innerHTML = '<p class="loading">در حال بارگذاری...</p>';
 
     const { data, error } = await supabaseClient
         .from('articles')
-        .select('*')
-        .eq('id', id)
-        .single();
+        .select('id, title, content, tag, cover_url, created_at, expires_at, views, likes')
+        .order('created_at', { ascending: false });
 
-    if (error || !data) {
-        page.innerHTML = `
-            <div class="article-error">
-                <p>مقاله پیدا نشد یا حذف شده 😕</p>
-                <a href="index.html" class="back-link">← بازگشت به خانه</a>
-            </div>
-        `;
+    if (error) {
+        console.error('خطا:', error);
+        list.innerHTML = '<p class="empty">خطا در بارگذاری مقالات</p>';
         return;
     }
 
-    if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        page.innerHTML = `
-            <div class="article-error">
-                <p>این مقاله منقضی شده ⏰</p>
-                <a href="index.html" class="back-link">← بازگشت به خانه</a>
-            </div>
-        `;
-        return;
-    }
+    const now = new Date();
+    allArticles = (data || []).filter(a => {
+        if (!a.expires_at) return true;
+        return new Date(a.expires_at) > now;
+    });
 
-    document.title = `${data.title} | پروگ آرت`;
-
-    // افزایش بازدید
-    incrementViews(id, data.views || 0);
-
-    const paragraphs = (data.content || '')
-        .split(/\n\s*\n|\n/)
-        .filter(p => p.trim())
-        .map(p => `<p>${escapeHtml(p.trim())}</p>`)
-        .join('');
-
-    const cover = data.cover_url
-        ? `<div class="article-cover">
-               <img src="${data.cover_url}" alt="" loading="eager" decoding="async">
-           </div>`
-        : '';
-
-    const readTime = calculateReadTime(data.content);
-    const isLiked = localStorage.getItem('liked-' + id) === '1';
-
-    page.innerHTML = `
-        <a href="index.html" class="back-link">← بازگشت به خانه</a>
-
-        ${cover}
-
-        <div class="article-body">
-            <div class="article-head">
-                <span class="article-tag">${escapeHtml(data.tag || 'عمومی')}</span>
-                <h1 class="article-title">${escapeHtml(data.title)}</h1>
-                <div class="article-meta-row">
-                    <span class="article-date">${formatDate(data.created_at)}</span>
-                    <span title="زمان مطالعه">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 6v6l4 2"></path>
-                        </svg>
-                        ${readTime} دقیقه
-                    </span>
-                    <span title="بازدید">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                        <span id="views-count">${(data.views || 0) + 1}</span>
-                    </span>
-                </div>
-            </div>
-
-            <div class="article-content">
-                ${paragraphs}
-            </div>
-
-            <div class="article-actions">
-                <button class="action-btn ${isLiked ? 'liked' : ''}" id="like-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                    <span id="likes-count">${data.likes || 0}</span>
-                </button>
-
-                <div class="share-menu">
-                    <button class="action-btn" id="share-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="18" cy="5" r="3"></circle>
-                            <circle cx="6" cy="12" r="3"></circle>
-                            <circle cx="18" cy="19" r="3"></circle>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                        </svg>
-                        اشتراک‌گذاری
-                    </button>
-                    <div class="share-dropdown" id="share-dropdown">
-                        <a href="https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(data.title)}" target="_blank">
-                            📱 تلگرام
-                        </a>
-                        <a href="https://wa.me/?text=${encodeURIComponent(data.title + ' ' + window.location.href)}" target="_blank">
-                            💬 واتساپ
-                        </a>
-                        <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(data.title)}" target="_blank">
-                            🐦 توییتر
-                        </a>
-                        <button id="copy-link">🔗 کپی لینک</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    setupLike(id, data.likes || 0, isLiked);
-    setupShare();
-    setupReadingProgress();
-    setupFocusMode();
+    buildCategories();
+    applyFilters();
 }
 
 
 // ============================================
-// ====== افزایش بازدید =======================
+// ====== ساخت نوار دسته‌بندی =================
 // ============================================
 
-async function incrementViews(id, currentViews) {
-    try {
-        await supabaseClient
-            .from('articles')
-            .update({ views: currentViews + 1 })
-            .eq('id', id);
-    } catch (err) {
-        console.warn('خطا در افزایش بازدید:', err);
-    }
-}
-
-
-// ============================================
-// ====== لایک ================================
-// ============================================
-
-function setupLike(id, currentLikes, isLiked) {
-    const btn = document.getElementById('like-btn');
-    const countEl = document.getElementById('likes-count');
-    if (!btn) return;
-
-    let liked = isLiked;
-    let likes = currentLikes;
-
-    btn.addEventListener('click', async () => {
-        const newLiked = !liked;
-        const newLikes = newLiked ? likes + 1 : likes - 1;
-
-        // آپدیت UI فوری
-        liked = newLiked;
-        likes = newLikes;
-        countEl.textContent = newLikes;
-        btn.classList.toggle('liked', liked);
-
-        if (liked) {
-            localStorage.setItem('liked-' + id, '1');
-        } else {
-            localStorage.removeItem('liked-' + id);
-        }
-
-        // آپدیت دیتابیس
-        try {
-            await supabaseClient
-                .from('articles')
-                .update({ likes: newLikes })
-                .eq('id', id);
-        } catch (err) {
-            console.warn('خطا در لایک:', err);
-        }
-    });
-}
-
-
-// ============================================
-// ====== اشتراک‌گذاری ========================
-// ============================================
-
-function setupShare() {
-    const btn = document.getElementById('share-btn');
-    const dropdown = document.getElementById('share-dropdown');
-    const copyBtn = document.getElementById('copy-link');
-
-    if (!btn) return;
-
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-
-        // اگه Web Share API داشت، استفاده کن
-        if (navigator.share) {
-            navigator.share({
-                title: document.title,
-                url: window.location.href
-            }).catch(() => {});
-            return;
-        }
-
-        dropdown.classList.toggle('show');
-    });
-
-    document.addEventListener('click', () => {
-        dropdown?.classList.remove('show');
-    });
-
-    copyBtn?.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        try {
-            await navigator.clipboard.writeText(window.location.href);
-            copyBtn.textContent = '✅ کپی شد!';
-            setTimeout(() => {
-                copyBtn.textContent = '🔗 کپی لینک';
-                dropdown.classList.remove('show');
-            }, 1500);
-        } catch (err) {
-            alert('کپی نشد، دستی کپی کن: ' + window.location.href);
-        }
-    });
-}
-
-
-// ============================================
-// ====== نوار پیشرفت مطالعه ==================
-// ============================================
-
-function setupReadingProgress() {
-    const bar = document.getElementById('reading-progress');
+function buildCategories() {
+    const bar = document.getElementById('categories-bar');
     if (!bar) return;
 
-    function updateProgress() {
-        const scrollTop = window.scrollY;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-        bar.style.width = progress + '%';
-    }
+    const tags = new Set();
+    allArticles.forEach(a => {
+        if (a.tag) tags.add(a.tag);
+    });
 
-    window.addEventListener('scroll', updateProgress, { passive: true });
-    updateProgress();
+    const sorted = ['همه', ...Array.from(tags).sort()];
+
+    bar.innerHTML = sorted.map(tag => `
+        <button class="cat-btn ${tag === currentCategory ? 'active' : ''}" data-tag="${escapeHtml(tag)}">
+            ${escapeHtml(tag)}
+        </button>
+    `).join('');
+
+    bar.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentCategory = btn.dataset.tag;
+            bar.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        });
+    });
 }
 
 
 // ============================================
-// ====== حالت مطالعه =========================
+// ====== اعمال فیلترها =======================
 // ============================================
 
-function setupFocusMode() {
-    // دکمه شناور
-    const btn = document.createElement('button');
-    btn.className = 'focus-toggle';
-    btn.setAttribute('aria-label', 'حالت مطالعه');
-    btn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-        </svg>
-    `;
+function applyFilters() {
+    const q = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
 
-    document.body.appendChild(btn);
+    let filtered = allArticles.filter(a => {
+        if (currentCategory !== 'همه' && a.tag !== currentCategory) return false;
 
-    const isFocus = localStorage.getItem('focus-mode') === '1';
-    if (isFocus) {
-        document.body.classList.add('focus-mode');
+        if (q) {
+            const title = (a.title || '').toLowerCase();
+            const content = (a.content || '').toLowerCase();
+            const tag = (a.tag || '').toLowerCase();
+            if (!title.includes(q) && !content.includes(q) && !tag.includes(q)) return false;
+        }
+
+        return true;
+    });
+
+    // مرتب‌سازی
+    if (currentSort === 'newest') {
+        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } else if (currentSort === 'oldest') {
+        filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    } else if (currentSort === 'popular') {
+        filtered.sort((a, b) => (b.views || 0) - (a.views || 0));
+    } else if (currentSort === 'liked') {
+        filtered.sort((a, b) => (b.likes || 0) - (a.likes || 0));
     }
 
-    btn.addEventListener('click', () => {
-        document.body.classList.toggle('focus-mode');
-        const active = document.body.classList.contains('focus-mode');
-        localStorage.setItem('focus-mode', active ? '1' : '0');
+    renderArticles(filtered);
+}
+
+
+// ============================================
+// ====== زمان مطالعه =========================
+// ============================================
+
+function calculateReadTime(text) {
+    if (!text) return 1;
+    const words = text.trim().split(/\s+/).length;
+    return Math.max(1, Math.ceil(words / 200));
+}
+
+
+// ============================================
+// ====== رندر کارت‌های مقاله ==================
+// ============================================
+
+function renderArticles(articles) {
+    const list = document.getElementById('articles-list');
+    if (!list) return;
+
+    if (articles.length === 0) {
+        const isFiltering = currentCategory !== 'همه' || document.getElementById('search-input')?.value.trim();
+        list.innerHTML = isFiltering
+            ? '<p class="empty">چیزی پیدا نشد 🔍</p>'
+            : '<p class="empty">هنوز مقاله‌ای منتشر نشده ✍️</p>';
+        return;
+    }
+
+    list.innerHTML = articles.map(a => {
+        const cover = a.cover_url
+            ? `<div class="card-cover">
+                   <img src="${a.cover_url}" alt="" loading="lazy" decoding="async">
+               </div>`
+            : '';
+
+        const readTime = calculateReadTime(a.content);
+
+        return `
+            <a href="article.html?id=${a.id}" class="card">
+                ${cover}
+                <div class="card-body">
+                    <span class="card-tag">${escapeHtml(a.tag || 'عمومی')}</span>
+                    <h3>${escapeHtml(a.title)}</h3>
+                    <p>${escapeHtml((a.content || '').slice(0, 120))}...</p>
+                    <div class="card-meta">
+                        <span>${formatDate(a.created_at)}</span>
+                        <div class="card-meta-stats">
+                            <span title="زمان مطالعه">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M12 6v6l4 2"></path>
+                                </svg>
+                                ${readTime} دقیقه
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+
+// ============================================
+// ====== جستجو ===============================
+// ============================================
+
+function setupSearch() {
+    const input = document.getElementById('search-input');
+    const clearBtn = document.getElementById('search-clear');
+    if (!input) return;
+
+    let timer;
+
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            const q = input.value.trim();
+            clearBtn.style.display = q ? 'flex' : 'none';
+            applyFilters();
+        }, 150);
     });
+
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.style.display = 'none';
+        applyFilters();
+        input.focus();
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            input.value = '';
+            clearBtn.style.display = 'none';
+            applyFilters();
+        }
+    });
+}
+
+
+// ============================================
+// ====== مرتب‌سازی ===========================
+// ============================================
+
+function setupSort() {
+    const select = document.getElementById('sort-select');
+    if (!select) return;
+
+    select.addEventListener('change', () => {
+        currentSort = select.value;
+        applyFilters();
+    });
+}
+
+
+// ============================================
+// ====== ابزارها =============================
+// ============================================
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return new Intl.DateTimeFormat('fa-IR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }).format(d);
+}
+
+
+// ============================================
+// ====== پاک‌سازی مقاله‌های منقضی ============
+// ============================================
+
+async function cleanupExpired() {
+    try {
+        const now = new Date().toISOString();
+
+        const { data: expired } = await supabaseClient
+            .from('articles')
+            .select('id, cover_url')
+            .not('expires_at', 'is', null)
+            .lt('expires_at', now);
+
+        if (!expired || expired.length === 0) return;
+
+        const imagePaths = expired
+            .filter(a => a.cover_url)
+            .map(a => {
+                const parts = a.cover_url.split('/article-images/');
+                return parts[1] || null;
+            })
+            .filter(Boolean);
+
+        if (imagePaths.length > 0) {
+            await supabaseClient.storage
+                .from('article-images')
+                .remove(imagePaths);
+        }
+
+        await supabaseClient
+            .from('articles')
+            .delete()
+            .lt('expires_at', now);
+
+        console.log(`🗑 ${expired.length} مقاله منقضی پاک شد`);
+    } catch (err) {
+        console.warn('خطا در پاک‌سازی:', err.message);
+    }
 }
 
 
@@ -298,6 +329,8 @@ function setupFocusMode() {
 // ====== شروع ================================
 // ============================================
 
-if (document.getElementById('article-page')) {
-    loadArticle();
+if (document.getElementById('articles-list')) {
+    loadArticles();
+    setupSearch();
+    setupSort();
 }
