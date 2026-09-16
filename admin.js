@@ -1,8 +1,15 @@
-// ====== متغیرهای عکس ======
+// ============================================
+// ====== متغیرهای عکس ========================
+// ============================================
+
 let selectedImageFile = null;
 let currentCoverUrl = null;
 
-// ====== چک کردن وضعیت ورود ======
+
+// ============================================
+// ====== چک کردن وضعیت ورود ==================
+// ============================================
+
 async function checkSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
@@ -20,12 +27,15 @@ function showLogin() {
 function showAdminPanel() {
     document.getElementById('login-view').style.display = 'none';
     document.getElementById('admin-view').style.display = 'block';
-cleanupExpired();          // 👈 این خط اضافه شه
+    cleanupExpired();          // 👈 پاک‌سازی مقاله‌های منقضی
     loadAdminArticles();
 }
 
 
-// ====== ورود ======
+// ============================================
+// ====== ورود ================================
+// ============================================
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value;
@@ -52,14 +62,20 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 });
 
 
-// ====== خروج ======
+// ============================================
+// ====== خروج ================================
+// ============================================
+
 document.getElementById('logout-btn').addEventListener('click', async () => {
     await supabaseClient.auth.signOut();
     showLogin();
 });
 
 
-// ====== آپلود عکس ======
+// ============================================
+// ====== آپلود عکس ===========================
+// ============================================
+
 const imageBox = document.getElementById('image-upload-box');
 const imageInput = document.getElementById('image-input');
 const imagePreview = document.getElementById('image-preview');
@@ -101,7 +117,10 @@ document.getElementById('remove-image').addEventListener('click', (e) => {
 });
 
 
-// ====== آپلود عکس به Supabase ======
+// ============================================
+// ====== آپلود عکس به Supabase ===============
+// ============================================
+
 async function uploadImage(file) {
     const ext = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -120,7 +139,10 @@ async function uploadImage(file) {
 }
 
 
-// ====== انتشار / ویرایش مقاله ======
+// ============================================
+// ====== انتشار / ویرایش مقاله ===============
+// ============================================
+
 document.getElementById('article-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -182,7 +204,10 @@ document.getElementById('article-form').addEventListener('submit', async (e) => 
 });
 
 
-// ====== ریست فرم ======
+// ============================================
+// ====== ریست فرم ============================
+// ============================================
+
 function resetForm() {
     document.getElementById('article-form').reset();
     document.getElementById('edit-id').value = '';
@@ -200,11 +225,17 @@ function resetForm() {
 }
 
 
-// ====== لغو ویرایش ======
+// ============================================
+// ====== لغو ویرایش ==========================
+// ============================================
+
 document.getElementById('cancel-edit-btn').addEventListener('click', resetForm);
 
 
-// ====== شروع ویرایش ======
+// ============================================
+// ====== شروع ویرایش =========================
+// ============================================
+
 async function editArticle(id) {
     const { data, error } = await supabaseClient
         .from('articles')
@@ -253,7 +284,10 @@ async function editArticle(id) {
 }
 
 
-// ====== بارگذاری مقاله‌های ادمین ======
+// ============================================
+// ====== بارگذاری مقاله‌های ادمین ============
+// ============================================
+
 async function loadAdminArticles() {
     const list = document.getElementById('admin-articles-list');
     if (!list) return;
@@ -295,7 +329,10 @@ async function loadAdminArticles() {
 }
 
 
-// ====== حذف مقاله ======
+// ============================================
+// ====== حذف مقاله ===========================
+// ============================================
+
 async function deleteArticle(id) {
     if (!confirm('مطمئنی می‌خوای این مقاله رو حذف کنی؟')) return;
 
@@ -313,5 +350,8 @@ async function deleteArticle(id) {
 }
 
 
-// ====== شروع ======
+// ============================================
+// ====== شروع ================================
+// ============================================
+
 checkSession();
