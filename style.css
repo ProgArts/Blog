@@ -13,6 +13,17 @@
     --text-muted: #9a94b8;
 }
 
+[data-theme="light"] {
+    --bg: #f7f5fc;
+    --bg-card: #ffffff;
+    --bg-card-hover: #faf8ff;
+    --border: #e5e0f0;
+    --purple: #7c5cd6;
+    --purple-deep: #6a4bc4;
+    --text: #1a1530;
+    --text-muted: #6b6480;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -34,6 +45,13 @@ body {
         radial-gradient(circle at 80% 100%, rgba(167, 139, 250, 0.08), transparent 45%);
     background-attachment: fixed;
     overflow-x: hidden;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+[data-theme="light"] body {
+    background-image:
+        radial-gradient(circle at 20% 0%, rgba(124, 92, 214, 0.06), transparent 45%),
+        radial-gradient(circle at 80% 100%, rgba(167, 139, 250, 0.04), transparent 45%);
 }
 
 
@@ -48,6 +66,11 @@ header {
     border-bottom: 1px solid var(--border);
     z-index: 100;
     padding: 1rem 2rem;
+    transition: background-color 0.3s;
+}
+
+[data-theme="light"] header {
+    background: rgba(247, 245, 252, 0.92);
 }
 
 @media (min-width: 769px) {
@@ -55,6 +78,9 @@ header {
         background: rgba(10, 8, 18, 0.75);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
+    }
+    [data-theme="light"] header {
+        background: rgba(247, 245, 252, 0.75);
     }
 }
 
@@ -64,6 +90,7 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
 }
 
 .logo {
@@ -73,12 +100,15 @@ nav {
     color: var(--text);
     text-decoration: none;
     letter-spacing: 1px;
+    flex-shrink: 0;
 }
 
 .nav-links {
     display: flex;
     gap: 1.5rem;
     list-style: none;
+    margin-right: auto;
+    margin-left: 1rem;
 }
 
 .nav-links a {
@@ -91,6 +121,44 @@ nav {
 
 .nav-links a:hover {
     color: var(--purple);
+}
+
+/* ====== دکمه تم ====== */
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+.theme-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.theme-toggle .icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .icon-sun {
+    display: block;
+}
+
+[data-theme="light"] .theme-toggle .icon-moon {
+    display: none;
 }
 
 
@@ -139,7 +207,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     flex-wrap: wrap;
 }
 
@@ -156,6 +224,15 @@ nav {
     color: var(--purple);
 }
 
+.articles-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex: 1;
+    max-width: 600px;
+    justify-content: flex-end;
+}
+
 
 /* ============================================ */
 /* ====== نوار جستجو ========================== */
@@ -169,8 +246,7 @@ nav {
     border: 1px solid var(--border);
     border-radius: 999px;
     padding: 0.5rem 1rem;
-    min-width: 260px;
-    max-width: 340px;
+    min-width: 220px;
     flex: 1;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -227,6 +303,65 @@ nav {
 
 .search-clear:hover {
     background: rgba(167, 139, 250, 0.15);
+    color: var(--purple);
+}
+
+
+/* ============================================ */
+/* ====== مرتب‌سازی =========================== */
+/* ============================================ */
+
+.sort-select {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    color: var(--text);
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.sort-select:hover,
+.sort-select:focus {
+    border-color: var(--purple-deep);
+}
+
+
+/* ============================================ */
+/* ====== نوار دسته‌بندی ====================== */
+/* ============================================ */
+
+.categories-bar {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.cat-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.cat-btn:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+.cat-btn.active {
+    background: rgba(167, 139, 250, 0.15);
+    border-color: var(--purple);
     color: var(--purple);
 }
 
@@ -321,10 +456,29 @@ nav {
 .card-meta {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     color: var(--text-muted);
     font-size: 0.75rem;
     padding-top: 0.75rem;
     border-top: 1px solid var(--border);
+    gap: 0.5rem;
+}
+
+.card-meta-stats {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.card-meta-stats span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.card-meta-stats svg {
+    width: 14px;
+    height: 14px;
 }
 
 
@@ -735,6 +889,23 @@ footer {
 
 
 /* ============================================ */
+/* ====== نوار پیشرفت مطالعه ================== */
+/* ============================================ */
+
+.reading-progress {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, var(--purple-deep), var(--purple));
+    z-index: 999;
+    transition: width 0.1s ease-out;
+    pointer-events: none;
+}
+
+
+/* ============================================ */
 /* ====== صفحه مقاله ========================== */
 /* ============================================ */
 
@@ -832,9 +1003,27 @@ footer {
     margin: 0;
 }
 
-.article-date {
+.article-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
     font-size: 0.75rem;
     color: var(--text-muted);
+}
+
+.article-meta-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.article-meta-row svg {
+    width: 14px;
+    height: 14px;
+}
+
+.article-date {
     opacity: 0.75;
     letter-spacing: 0.2px;
 }
@@ -849,7 +1038,8 @@ footer {
 
 .article-content p {
     margin-bottom: 1.5rem;
-    color: #d8d6e6;
+    color: var(--text);
+    opacity: 0.92;
 }
 
 .article-content p:last-child {
@@ -865,6 +1055,178 @@ footer {
 .article-error p {
     font-size: 1.1rem;
     margin-bottom: 1.5rem;
+}
+
+
+/* ============================================ */
+/* ====== نوار اقدامات مقاله ================== */
+/* ============================================ */
+
+.article-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.55rem 1rem;
+    border-radius: 999px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.action-btn:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+.action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.action-btn.liked {
+    background: rgba(224, 112, 128, 0.1);
+    border-color: #e07080;
+    color: #e07080;
+}
+
+.action-btn.liked svg {
+    fill: currentColor;
+}
+
+.action-btn.active {
+    background: rgba(167, 139, 250, 0.15);
+    border-color: var(--purple);
+    color: var(--purple);
+}
+
+.share-menu {
+    position: relative;
+}
+
+.share-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 160px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 50;
+}
+
+.share-dropdown.show {
+    display: flex;
+}
+
+.share-dropdown a,
+.share-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 0.85rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: right;
+    width: 100%;
+}
+
+.share-dropdown a:hover,
+.share-dropdown button:hover {
+    background: rgba(167, 139, 250, 0.1);
+    color: var(--purple);
+}
+
+
+/* ============================================ */
+/* ====== حالت مطالعه (Focus Mode) ============ */
+/* ============================================ */
+
+body.focus-mode header,
+body.focus-mode footer,
+body.focus-mode .back-link,
+body.focus-mode .article-tag,
+body.focus-mode .article-meta-row {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+body.focus-mode .article-page {
+    max-width: 700px;
+    padding-top: 4rem;
+}
+
+body.focus-mode .article-content {
+    font-size: 1.15rem;
+    line-height: 2.3;
+}
+
+body.focus-mode .article-title {
+    font-size: 2.5rem;
+}
+
+.focus-toggle {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 90;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.focus-toggle:hover {
+    border-color: var(--purple);
+    color: var(--purple);
+    transform: translateY(-2px);
+}
+
+.focus-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+body.focus-mode .focus-toggle {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: white;
 }
 
 
@@ -885,8 +1247,18 @@ footer {
         gap: 1rem;
     }
 
+    .articles-controls {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: none;
+    }
+
     .search-box {
         max-width: none;
+        width: 100%;
+    }
+
+    .sort-select {
         width: 100%;
     }
 
@@ -903,4 +1275,11 @@ footer {
     .article-cover { border-radius: 14px; margin-bottom: 1.5rem; }
     .article-title { font-size: 1.6rem; }
     .article-content { font-size: 0.95rem; line-height: 2; }
+
+    .focus-toggle {
+        bottom: 1rem;
+        left: 1rem;
+        width: 42px;
+        height: 42px;
+    }
 }
