@@ -32,48 +32,100 @@
     </header>
 
     <main class="chat-page">
-        
-        <div class="chat-header">
-            <h1>💬 چت روم</h1>
-            <p>با بقیه کاربران پروگ آرت گپ بزن</p>
-            <div class="chat-status" id="chat-status">
-                <span class="status-dot"></span>
-                <span id="status-text">در حال اتصال...</span>
+
+        <!-- ====== صفحه ورود / انتخاب اسم ====== -->
+        <div class="chat-auth" id="chat-auth">
+            <div class="chat-auth-box">
+                <h2>ورود به چت</h2>
+                
+                <!-- مرحله ۱: ایمیل -->
+                <div id="auth-step-email">
+                    <p class="chat-auth-sub">ایمیلت رو وارد کن تا کد ورود برات بیاد</p>
+                    <form id="email-form">
+                        <div class="form-group">
+                            <input 
+                                type="email" 
+                                id="chat-email" 
+                                placeholder="you@example.com"
+                                required
+                                autocomplete="email"
+                            >
+                        </div>
+                        <button type="submit" class="btn-primary" id="email-btn">ارسال کد</button>
+                        <p class="form-error" id="email-error"></p>
+                    </form>
+                </div>
+
+                <!-- مرحله ۲: کد -->
+                <div id="auth-step-code" style="display: none;">
+                    <p class="chat-auth-sub">
+                        کد ۶ رقمی به ایمیلت فرستادیم
+                        <br>
+                        <strong id="sent-email"></strong>
+                    </p>
+                    <form id="code-form">
+                        <div class="form-group">
+                            <input 
+                                type="text" 
+                                id="chat-code" 
+                                placeholder="۱۲۳۴۵۶"
+                                maxlength="6"
+                                inputmode="numeric"
+                                pattern="[0-9]*"
+                                required
+                                autocomplete="one-time-code"
+                            >
+                        </div>
+                        <button type="submit" class="btn-primary" id="code-btn">ورود</button>
+                        <p class="form-error" id="code-error"></p>
+                        <button type="button" class="chat-back-btn" id="back-to-email">← تغییر ایمیل</button>
+                    </form>
+                </div>
+
             </div>
         </div>
 
-        <div class="chat-container" id="chat-container">
-            <div class="chat-messages" id="chat-messages">
-                <p class="loading">در حال بارگذاری پیام‌ها...</p>
+        <!-- ====== چت ====== -->
+        <div id="chat-main" style="display: none;">
+            <div class="chat-header">
+                <h1>💬 چت روم</h1>
+                <div class="chat-user-bar">
+                    <span class="chat-user-info">
+                        <strong id="user-display-name"></strong>
+                        <span class="chat-user-email" id="user-email"></span>
+                    </span>
+                    <button class="btn-ghost chat-logout" id="chat-logout">خروج</button>
+                </div>
+                <div class="chat-status" id="chat-status">
+                    <span class="status-dot"></span>
+                    <span id="status-text">در حال اتصال...</span>
+                </div>
             </div>
 
-            <form class="chat-form" id="chat-form">
-                <div class="chat-form-row">
-                    <input 
-                        type="text" 
-                        id="chat-username" 
-                        placeholder="اسمت..."
-                        maxlength="20"
-                        required
-                    >
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <p class="loading">در حال بارگذاری پیام‌ها...</p>
                 </div>
-                <div class="chat-form-row chat-form-main">
-                    <input 
-                        type="text" 
-                        id="chat-input" 
-                        placeholder="پیامت رو بنویس..."
-                        maxlength="500"
-                        autocomplete="off"
-                        required
-                    >
-                    <button type="submit" class="chat-send-btn" id="chat-send" aria-label="ارسال">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="22" y1="2" x2="11" y2="13"></line>
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                        </svg>
-                    </button>
-                </div>
-            </form>
+
+                <form class="chat-form" id="chat-form">
+                    <div class="chat-form-row chat-form-main">
+                        <input 
+                            type="text" 
+                            id="chat-input" 
+                            placeholder="پیامت رو بنویس..."
+                            maxlength="500"
+                            autocomplete="off"
+                            required
+                        >
+                        <button type="submit" class="chat-send-btn" id="chat-send" aria-label="ارسال">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
     </main>
