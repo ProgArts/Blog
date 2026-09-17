@@ -125,7 +125,7 @@ async function uploadImage(file) {
     const ext = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    const { data, error } = await supabaseClient.storage
+    const { error } = await supabaseClient.storage
         .from('article-images')
         .upload(fileName, file);
 
