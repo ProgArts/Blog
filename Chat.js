@@ -3,7 +3,8 @@
 // ============================================
 
 let chatChannel = null;
-let myUsername = '';
+let currentUser = null;
+let currentDisplayName = '';
 
 
 // ============================================
@@ -11,21 +12,191 @@ let myUsername = '';
 // ============================================
 
 async function initChat() {
-    const messagesEl = document.getElementById('chat-messages');
-    if (!messagesEl) return;
+    const authEl = document.getElementById('chat-auth');
+    if (!authEl) return;
 
-    myUsername = localStorage.getItem('chat-username') || '';
-    if (myUsername) {
-        document.getElementById('chat-username').value = myUsername;
+    // چک کن کاربر لاگین هست یا نه
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    if (session && session.user) {
+        // اگه اسم نمایشی نداشت، بپرس
+        const displayName = localStorage.getItem('chat-display-name');
+        if (!displayName) {
+            askForDisplayName(session.user);
+        } else {
+            currentUser = session.user;
+            currentDisplayName = displayName;
+            showChat();
+        }
+    } else {
+        showAuth();
     }
+}
+
+
+// ============================================
+// ====== نمایش صفحه ورود =====================
+// ============================================
+
+function showAuth() {
+    document.getElementById('chat-auth').style.display = 'block';
+    document.getElementById('chat-main').style.display = 'none';
+    document.getElementById('auth-step-email').style.display = 'block';
+    document.getElementById('auth-step-code').style.display = 'none';
+}
+
+
+// ============================================
+// ====== نمایش چت =============================
+// ============================================
+
+async function showChat() {
+    document.getElementById('chat-auth').style.display = 'none';
+    document.getElementById('chat-main').style.display = 'block';
+
+    // نمایش اطلاعات کاربر
+    document.getElementById('user-display-name').textContent = currentDisplayName;
+    document.getElementById('user-email').textContent = currentUser.email;
 
     await cleanupOldMessages();
     await loadMessages();
     setupRealtime();
     setupChatForm();
-
     setStatus('آنلاین', true);
 }
+
+
+// ============================================
+// ====== مرحله ۱: ارسال کد به ایمیل =========
+// ============================================
+
+document.getElementById('email-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('chat-email').value.trim();
+    const btn = document.getElementById('email-btn');
+    const errorEl = document.getElementById('email-error');
+
+    btn.textContent = 'در حال ارسال...';
+    btn.disabled = true;
+    errorEl.textContent = '';
+
+    const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: {
+            shouldCreateUser: true
+        }
+    });
+
+    btn.textContent = 'ارسال کد';
+    btn.disabled = false;
+
+    if (error) {
+        errorEl.textContent = 'خطا: ' + error.message;
+        return;
+    }
+
+    // رفتن به مرحله ۲
+    document.getElementById('auth-step-email').style.display = 'none';
+    document.getElementById('auth-step-code').style.display = 'block';
+    document.getElementById('sent-email').textContent = email;
+    document.getElementById('chat-code').focus();
+});
+
+
+// ============================================
+// ====== مرحله ۲: تأیید کد ===================
+// ============================================
+
+document.getElementById('code-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('sent-email').textContent;
+    const token = document.getElementById('chat-code').value.trim();
+    const btn = document.getElementById('code-btn');
+    const errorEl = document.getElementById('code-error');
+
+    btn.textContent = 'در حال بررسی...';
+    btn.disabled = true;
+    errorEl.textContent = '';
+
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+        email,
+        token,
+        type: 'email'
+    });
+
+    if (error) {
+        errorEl.textContent = 'کد اشتباه یا منقضی شده';
+        btn.textContent = 'ورود';
+        btn.disabled = false;
+        return;
+    }
+
+    // حالا کاربر لاگین شد
+    currentUser = data.user;
+
+    // اگه اسم نمایشی داشت، بفرستش چت
+    const savedName = localStorage.getItem('chat-display-name');
+    if (savedName) {
+        currentDisplayName = savedName;
+        showChat();
+    } else {
+        askForDisplayName(currentUser);
+    }
+});
+
+
+// ============================================
+// ====== برگشت به مرحله ایمیل ================
+// ============================================
+
+document.getElementById('back-to-email').addEventListener('click', () => {
+    document.getElementById('auth-step-email').style.display = 'block';
+    document.getElementById('auth-step-code').style.display = 'none';
+});
+
+
+// ============================================
+// ====== گرفتن اسم نمایشی ====================
+// ============================================
+
+function askForDisplayName(user) {
+    let name = prompt('یه اسم برای خودت انتخاب کن (مثلاً: علی):', '');
+
+    // اگه لغو کرد یا خالی بود، دوباره بپرس
+    while (!name || !name.trim()) {
+        name = prompt('اسم نمی‌تونه خالی باشه. یه اسم انتخاب کن:', '');
+        if (name === null) {
+            // اگه لغو کرد، از اکانت خارج شو
+            supabaseClient.auth.signOut();
+            showAuth();
+            return;
+        }
+    }
+
+    name = name.trim().slice(0, 20);
+    localStorage.setItem('chat-display-name', name);
+    currentUser = user;
+    currentDisplayName = name;
+    showChat();
+}
+
+
+// ============================================
+// ====== خروج ================================
+// ============================================
+
+document.getElementById('chat-logout').addEventListener('click', async () => {
+    if (!confirm('از چت خارج می‌شی؟')) return;
+
+    await supabaseClient.auth.signOut();
+
+    // اگه بخوای، اسم نمایشی رو پاک کن
+    // localStorage.removeItem('chat-display-name');
+
+    currentUser = null;
+    currentDisplayName = '';
+    showAuth();
+});
 
 
 // ============================================
@@ -80,13 +251,15 @@ async function loadMessages() {
 // ============================================
 
 function renderMessage(msg) {
-    const isMine = msg.username === myUsername;
+    // پیام من = پیام از همون user_id
+    const isMine = currentUser && msg.user_id === currentUser.id;
+    const name = msg.display_name || msg.username || 'کاربر';
     const time = formatTime(msg.created_at);
 
     return `
         <div class="chat-message ${isMine ? 'mine' : ''}" data-id="${msg.id}">
             <div class="chat-message-header">
-                <span class="chat-message-name">${escapeHtml(msg.username)}</span>
+                <span class="chat-message-name">${escapeHtml(name)}</span>
                 <span class="chat-message-time">${time}</span>
             </div>
             <div class="chat-message-content">${escapeHtml(msg.content)}</div>
@@ -100,6 +273,10 @@ function renderMessage(msg) {
 // ============================================
 
 function setupRealtime() {
+    if (chatChannel) {
+        supabaseClient.removeChannel(chatChannel);
+    }
+
     chatChannel = supabaseClient
         .channel('chat-room')
         .on(
@@ -167,42 +344,31 @@ function scrollToBottom() {
 
 function setupChatForm() {
     const form = document.getElementById('chat-form');
-    const usernameInput = document.getElementById('chat-username');
     const messageInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('chat-send');
 
     if (!form) return;
 
-    usernameInput.addEventListener('input', () => {
-        myUsername = usernameInput.value.trim();
-        localStorage.setItem('chat-username', myUsername);
-    });
-
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const username = usernameInput.value.trim();
         const content = messageInput.value.trim();
-
-        if (!username) {
-            usernameInput.focus();
-            return;
-        }
-
         if (!content) {
             messageInput.focus();
             return;
         }
-
-        myUsername = username;
-        localStorage.setItem('chat-username', username);
 
         sendBtn.disabled = true;
         messageInput.disabled = true;
 
         const { data, error } = await supabaseClient
             .from('messages')
-            .insert([{ username, content }])
+            .insert([{
+                user_id: currentUser.id,
+                display_name: currentDisplayName,
+                username: currentDisplayName,
+                content
+            }])
             .select()
             .single();
 
@@ -265,6 +431,6 @@ function formatTime(dateStr) {
 // ====== شروع ================================
 // ============================================
 
-if (document.getElementById('chat-messages')) {
+if (document.getElementById('chat-auth')) {
     initChat();
 }
