@@ -1,307 +1,354 @@
 // ============================================
-// ====== بارگذاری مقاله ======================
+// ====== متغیرهای عکس ========================
 // ============================================
 
-async function loadArticle() {
-    const page = document.getElementById('article-page');
-    if (!page) return;
+let selectedImageFile = null;
+let currentCoverUrl = null;
 
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id');
 
-    if (!id) {
-        page.innerHTML = `
-            <div class="article-error">
-                <p>مقاله پیدا نشد 😕</p>
-                <a href="index.html" class="back-link">← بازگشت به خانه</a>
-            </div>
-        `;
+// ============================================
+// ====== چک کردن وضعیت ورود ==================
+// ============================================
+
+async function checkSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        showAdminPanel();
+    } else {
+        showLogin();
+    }
+}
+
+function showLogin() {
+    document.getElementById('login-view').style.display = 'block';
+    document.getElementById('admin-view').style.display = 'none';
+}
+
+function showAdminPanel() {
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('admin-view').style.display = 'block';
+    cleanupExpired();
+    loadAdminArticles();
+}
+
+
+// ============================================
+// ====== ورود ================================
+// ============================================
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('login-btn');
+    const errorEl = document.getElementById('login-error');
+
+    btn.textContent = 'در حال ورود...';
+    btn.disabled = true;
+    errorEl.textContent = '';
+
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+    if (error) {
+        errorEl.textContent = 'ایمیل یا رمز اشتباه است';
+        btn.textContent = 'ورود';
+        btn.disabled = false;
         return;
     }
 
+    showAdminPanel();
+    btn.textContent = 'ورود';
+    btn.disabled = false;
+});
+
+
+// ============================================
+// ====== خروج ================================
+// ============================================
+
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    await supabaseClient.auth.signOut();
+    showLogin();
+});
+
+
+// ============================================
+// ====== آپلود عکس ===========================
+// ============================================
+
+const imageBox = document.getElementById('image-upload-box');
+const imageInput = document.getElementById('image-input');
+const imagePreview = document.getElementById('image-preview');
+const imagePreviewWrap = document.getElementById('image-preview-wrap');
+const imagePlaceholder = document.getElementById('image-placeholder');
+
+imageBox.addEventListener('click', (e) => {
+    if (e.target.closest('#remove-image')) return;
+    imageInput.click();
+});
+
+imageInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('حجم عکس باید کمتر از ۵ مگابایت باشد');
+        return;
+    }
+
+    selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        imagePreview.src = ev.target.result;
+        imagePreviewWrap.style.display = 'block';
+        imagePlaceholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+});
+
+document.getElementById('remove-image').addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedImageFile = null;
+    currentCoverUrl = null;
+    imageInput.value = '';
+    imagePreview.src = '';
+    imagePreviewWrap.style.display = 'none';
+    imagePlaceholder.style.display = 'block';
+});
+
+
+// ============================================
+// ====== آپلود عکس به Supabase ===============
+// ============================================
+
+async function uploadImage(file) {
+    const ext = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    const { error } = await supabaseClient.storage
+        .from('article-images')
+        .upload(fileName, file);
+
+    if (error) throw error;
+
+    const { data: urlData } = supabaseClient.storage
+        .from('article-images')
+        .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+}
+
+
+// ============================================
+// ====== انتشار / ویرایش مقاله ===============
+// ============================================
+
+document.getElementById('article-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const editId = document.getElementById('edit-id').value;
+    const title = document.getElementById('title').value.trim();
+    const tag = document.getElementById('tag').value.trim() || 'عمومی';
+    const content = document.getElementById('content').value.trim();
+    const days = parseInt(document.getElementById('expires').value);
+
+    const btn = document.getElementById('publish-btn');
+    const successEl = document.getElementById('publish-success');
+    const errorEl = document.getElementById('publish-error');
+
+    btn.textContent = editId ? 'در حال ذخیره...' : 'در حال انتشار...';
+    btn.disabled = true;
+    successEl.textContent = '';
+    errorEl.textContent = '';
+
+    try {
+        let coverUrl = currentCoverUrl;
+        if (selectedImageFile) {
+            coverUrl = await uploadImage(selectedImageFile);
+        }
+
+        let expiresAt = null;
+        if (days > 0) {
+            const d = new Date();
+            d.setDate(d.getDate() + days);
+            expiresAt = d.toISOString();
+        }
+
+        let error;
+        if (editId) {
+            const res = await supabaseClient
+                .from('articles')
+                .update({ title, tag, content, cover_url: coverUrl, expires_at: expiresAt })
+                .eq('id', editId);
+            error = res.error;
+        } else {
+            const res = await supabaseClient
+                .from('articles')
+                .insert([{ title, tag, content, cover_url: coverUrl, expires_at: expiresAt }]);
+            error = res.error;
+        }
+
+        if (error) throw error;
+
+        successEl.textContent = editId ? '✅ مقاله ویرایش شد' : '✅ مقاله منتشر شد';
+        resetForm();
+        loadAdminArticles();
+
+    } catch (err) {
+        console.error(err);
+        errorEl.textContent = 'خطا: ' + err.message;
+    } finally {
+        btn.textContent = '🚀 انتشار مقاله';
+        btn.disabled = false;
+    }
+});
+
+
+// ============================================
+// ====== ریست فرم ============================
+// ============================================
+
+function resetForm() {
+    document.getElementById('article-form').reset();
+    document.getElementById('edit-id').value = '';
+    document.getElementById('tag').value = 'عمومی';
+    document.getElementById('editor-title').textContent = 'مقاله جدید';
+    document.getElementById('publish-btn').textContent = '🚀 انتشار مقاله';
+    document.getElementById('cancel-edit-btn').style.display = 'none';
+
+    selectedImageFile = null;
+    currentCoverUrl = null;
+    imageInput.value = '';
+    imagePreview.src = '';
+    imagePreviewWrap.style.display = 'none';
+    imagePlaceholder.style.display = 'block';
+}
+
+
+// ============================================
+// ====== لغو ویرایش ==========================
+// ============================================
+
+document.getElementById('cancel-edit-btn').addEventListener('click', resetForm);
+
+
+// ============================================
+// ====== شروع ویرایش =========================
+// ============================================
+
+async function editArticle(id) {
     const { data, error } = await supabaseClient
         .from('articles')
         .select('*')
         .eq('id', id)
         .single();
 
-    if (error || !data) {
-        console.error('خطا:', error);
-        page.innerHTML = `
-            <div class="article-error">
-                <p>مقاله پیدا نشد یا حذف شده 😕</p>
-                <a href="index.html" class="back-link">← بازگشت به خانه</a>
-            </div>
-        `;
+    if (error) {
+        alert('خطا در بارگذاری مقاله');
         return;
     }
 
-    if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        page.innerHTML = `
-            <div class="article-error">
-                <p>این مقاله منقضی شده ⏰</p>
-                <a href="index.html" class="back-link">← بازگشت به خانه</a>
-            </div>
-        `;
+    document.getElementById('edit-id').value = data.id;
+    document.getElementById('title').value = data.title;
+    document.getElementById('tag').value = data.tag || 'عمومی';
+    document.getElementById('content').value = data.content;
+
+    if (data.cover_url) {
+        currentCoverUrl = data.cover_url;
+        imagePreview.src = data.cover_url;
+        imagePreviewWrap.style.display = 'block';
+        imagePlaceholder.style.display = 'none';
+    } else {
+        currentCoverUrl = null;
+        imagePreviewWrap.style.display = 'none';
+        imagePlaceholder.style.display = 'block';
+    }
+
+    if (data.expires_at) {
+        const diff = Math.ceil((new Date(data.expires_at) - new Date()) / (1000 * 60 * 60 * 24));
+        const select = document.getElementById('expires');
+        let found = false;
+        for (let opt of select.options) {
+            if (parseInt(opt.value) === diff) { found = true; break; }
+        }
+        select.value = found ? diff : '30';
+    } else {
+        document.getElementById('expires').value = '0';
+    }
+
+    document.getElementById('editor-title').textContent = 'ویرایش مقاله';
+    document.getElementById('publish-btn').textContent = '💾 ذخیره تغییرات';
+    document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+// ============================================
+// ====== بارگذاری مقاله‌های ادمین ============
+// ============================================
+
+async function loadAdminArticles() {
+    const list = document.getElementById('admin-articles-list');
+    if (!list) return;
+
+    const { data, error } = await supabaseClient
+        .from('articles')
+        .select('id, title, tag, cover_url, created_at, expires_at, views, likes')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        list.innerHTML = '<p class="empty">خطا در بارگذاری</p>';
         return;
     }
 
-    document.title = `${data.title} | پروگ آرت`;
+    if (!data || data.length === 0) {
+        list.innerHTML = '<p class="empty">هنوز مقاله‌ای نساختی</p>';
+        return;
+    }
 
-    incrementViews(id, data.views || 0);
-
-    const paragraphs = (data.content || '')
-        .split(/\n\s*\n|\n/)
-        .filter(p => p.trim())
-        .map(p => `<p>${escapeHtml(p.trim())}</p>`)
-        .join('');
-
-    const cover = data.cover_url
-        ? `<div class="article-cover">
-               <img src="${data.cover_url}" alt="" loading="eager" decoding="async">
-           </div>`
-        : '';
-
-    const readTime = calculateReadTime(data.content);
-    const isLiked = localStorage.getItem('liked-' + id) === '1';
-
-    page.innerHTML = `
-        <a href="index.html" class="back-link">← بازگشت به خانه</a>
-
-        ${cover}
-
-        <div class="article-body">
-            <div class="article-head">
-                <span class="article-tag">${escapeHtml(data.tag || 'عمومی')}</span>
-                <h1 class="article-title">${escapeHtml(data.title)}</h1>
-                <div class="article-meta-row">
-                    <span class="article-date">${formatDate(data.created_at)}</span>
-                    <span title="زمان مطالعه">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 6v6l4 2"></path>
-                        </svg>
-                        ${readTime} دقیقه
-                    </span>
-                    <span title="بازدید">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                        <span id="views-count">${(data.views || 0) + 1}</span>
-                    </span>
-                </div>
+    list.innerHTML = data.map(a => `
+        <div class="admin-article-row">
+            ${a.cover_url 
+                ? `<img src="${a.cover_url}" class="admin-thumb" alt="" loading="lazy" decoding="async">` 
+                : `<div class="admin-thumb no-img">📄</div>`}
+            <div class="admin-article-info">
+                <span class="card-tag">${escapeHtml(a.tag || 'عمومی')}</span>
+                <strong>${escapeHtml(a.title)}</strong>
+                <small>
+                    ${formatDate(a.created_at)}
+                    ${a.expires_at ? ' • انقضا: ' + formatDate(a.expires_at) : ' • بدون انقضا'}
+                    • 👁 ${a.views || 0}
+                    • ❤️ ${a.likes || 0}
+                </small>
             </div>
-
-            <div class="article-content">
-                ${paragraphs}
-            </div>
-
-            <div class="article-actions">
-                <button class="action-btn ${isLiked ? 'liked' : ''}" id="like-btn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                    <span id="likes-count">${data.likes || 0}</span>
-                </button>
-
-                <div class="share-menu">
-                    <button class="action-btn" id="share-btn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="18" cy="5" r="3"></circle>
-                            <circle cx="6" cy="12" r="3"></circle>
-                            <circle cx="18" cy="19" r="3"></circle>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                        </svg>
-                        اشتراک‌گذاری
-                    </button>
-                    <div class="share-dropdown" id="share-dropdown">
-                        <a href="https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(data.title)}" target="_blank" rel="noopener">
-                            📱 تلگرام
-                        </a>
-                        <a href="https://wa.me/?text=${encodeURIComponent(data.title + ' ' + window.location.href)}" target="_blank" rel="noopener">
-                            💬 واتساپ
-                        </a>
-                        <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(data.title)}" target="_blank" rel="noopener">
-                            🐦 توییتر
-                        </a>
-                        <button id="copy-link">🔗 کپی لینک</button>
-                    </div>
-                </div>
+            <div class="admin-actions">
+                <button class="btn-edit" onclick="editArticle('${a.id}')">✏️ ویرایش</button>
+                <button class="btn-delete" onclick="deleteArticle('${a.id}')">🗑 حذف</button>
             </div>
         </div>
-    `;
-
-    setupLike(id, data.likes || 0, isLiked);
-    setupShare();
-    setupReadingProgress();
-    setupFocusMode();
+    `).join('');
 }
 
 
 // ============================================
-// ====== افزایش بازدید =======================
+// ====== حذف مقاله ===========================
 // ============================================
 
-async function incrementViews(id, currentViews) {
-    try {
-        await supabaseClient
-            .from('articles')
-            .update({ views: currentViews + 1 })
-            .eq('id', id);
-    } catch (err) {
-        console.warn('خطا در افزایش بازدید:', err);
-    }
-}
+async function deleteArticle(id) {
+    if (!confirm('مطمئنی می‌خوای این مقاله رو حذف کنی؟')) return;
 
+    const { error } = await supabaseClient
+        .from('articles')
+        .delete()
+        .eq('id', id);
 
-// ============================================
-// ====== لایک ================================
-// ============================================
-
-function setupLike(id, currentLikes, isLiked) {
-    const btn = document.getElementById('like-btn');
-    const countEl = document.getElementById('likes-count');
-    if (!btn) return;
-
-    let liked = isLiked;
-    let likes = currentLikes;
-
-    btn.addEventListener('click', async () => {
-        const newLiked = !liked;
-        const newLikes = newLiked ? likes + 1 : likes - 1;
-
-        liked = newLiked;
-        likes = newLikes;
-        countEl.textContent = newLikes;
-        btn.classList.toggle('liked', liked);
-
-        if (liked) {
-            localStorage.setItem('liked-' + id, '1');
-        } else {
-            localStorage.removeItem('liked-' + id);
-        }
-
-        try {
-            await supabaseClient
-                .from('articles')
-                .update({ likes: newLikes })
-                .eq('id', id);
-        } catch (err) {
-            console.warn('خطا در لایک:', err);
-        }
-    });
-}
-
-
-// ============================================
-// ====== اشتراک‌گذاری ========================
-// ============================================
-
-function setupShare() {
-    const btn = document.getElementById('share-btn');
-    const dropdown = document.getElementById('share-dropdown');
-    const copyBtn = document.getElementById('copy-link');
-
-    if (!btn) return;
-
-    btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-
-        if (navigator.share) {
-            navigator.share({
-                title: document.title,
-                url: window.location.href
-            }).catch(() => {});
-            return;
-        }
-
-        dropdown.classList.toggle('show');
-    });
-
-    document.addEventListener('click', () => {
-        dropdown?.classList.remove('show');
-    });
-
-    copyBtn?.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        try {
-            await navigator.clipboard.writeText(window.location.href);
-            copyBtn.textContent = '✅ کپی شد!';
-            setTimeout(() => {
-                copyBtn.textContent = '🔗 کپی لینک';
-                dropdown.classList.remove('show');
-            }, 1500);
-        } catch (err) {
-            alert('کپی نشد: ' + window.location.href);
-        }
-    });
-}
-
-
-// ============================================
-// ====== نوار پیشرفت مطالعه ==================
-// ============================================
-
-function setupReadingProgress() {
-    const bar = document.getElementById('reading-progress');
-    if (!bar) return;
-
-    let ticking = false;
-    let cachedHeight = 0;
-
-    function updateHeight() {
-        cachedHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (error) {
+        alert('خطا در حذف: ' + error.message);
+        return;
     }
 
-    function updateProgress() {
-        const scrollTop = window.scrollY;
-        const progress = cachedHeight > 0 ? (scrollTop / cachedHeight) * 100 : 0;
-        bar.style.width = progress + '%';
-        ticking = false;
-    }
-
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(updateProgress);
-            ticking = true;
-        }
-    }, { passive: true });
-
-    window.addEventListener('resize', updateHeight, { passive: true });
-    updateHeight();
-    updateProgress();
-}
-
-
-// ============================================
-// ====== حالت مطالعه =========================
-// ============================================
-
-function setupFocusMode() {
-    const btn = document.createElement('button');
-    btn.className = 'focus-toggle';
-    btn.setAttribute('aria-label', 'حالت مطالعه');
-    btn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-        </svg>
-    `;
-
-    document.body.appendChild(btn);
-
-    const isFocus = localStorage.getItem('focus-mode') === '1';
-    if (isFocus) {
-        document.body.classList.add('focus-mode');
-    }
-
-    btn.addEventListener('click', () => {
-        document.body.classList.toggle('focus-mode');
-        const active = document.body.classList.contains('focus-mode');
-        localStorage.setItem('focus-mode', active ? '1' : '0');
-    });
+    loadAdminArticles();
 }
 
 
@@ -309,6 +356,4 @@ function setupFocusMode() {
 // ====== شروع ================================
 // ============================================
 
-if (document.getElementById('article-page')) {
-    loadArticle();
-}
+checkSession();
