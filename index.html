@@ -6,9 +6,8 @@
     <title>پروگ آرت | Prog Arts</title>
     <meta name="description" content="پروگ آرت - جایی که کد و هنر به هم می‌رسند">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/lalezar-font@v1.0.0/dist/font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -18,8 +17,18 @@
             <a href="index.html" class="logo">پروگ آرت</a>
             <ul class="nav-links">
                 <li><a href="index.html">خانه</a></li>
+                <li><a href="chat.html">چت روم</a></li>
                 <li><a href="admin.html">پنل ادمین</a></li>
             </ul>
+            <button class="theme-toggle" id="theme-toggle" aria-label="تغییر تم">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+                </svg>
+            </button>
         </nav>
     </header>
 
@@ -33,22 +42,33 @@
         <div class="articles-header">
             <h2 class="section-title">آخرین <span>مقالات</span></h2>
             
-            <div class="search-box">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.35-4.35"></path>
-                </svg>
-                <input 
-                    type="text" 
-                    id="search-input" 
-                    placeholder="جستجو در مقالات..."
-                    autocomplete="off"
-                >
-                <button type="button" class="search-clear" id="search-clear" style="display: none;">
-                    ✕
-                </button>
+            <div class="articles-controls">
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="جستجو در مقالات..."
+                        autocomplete="off"
+                    >
+                    <button type="button" class="search-clear" id="search-clear" style="display: none;">
+                        ✕
+                    </button>
+                </div>
+                
+                <select id="sort-select" class="sort-select">
+                    <option value="newest">جدیدترین</option>
+                    <option value="oldest">قدیمی‌ترین</option>
+                    <option value="popular">پربازدیدترین</option>
+                    <option value="liked">محبوب‌ترین</option>
+                </select>
             </div>
         </div>
+
+        <div class="categories-bar" id="categories-bar"></div>
 
         <div class="cards-grid" id="articles-list">
             <p class="loading">در حال بارگذاری...</p>
