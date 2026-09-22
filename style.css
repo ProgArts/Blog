@@ -1,4 +1,41 @@
 /* ============================================ */
+/* ====== فونت‌های محلی ======================= */
+/* ============================================ */
+
+@font-face {
+    font-family: 'Lalezar';
+    src: url('fonts/Lalezar-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('fonts/Vazirmatn-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('fonts/Vazirmatn-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Vazirmatn';
+    src: url('fonts/Vazirmatn-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+/* ============================================ */
 /* ====== تنظیمات پایه ======================== */
 /* ============================================ */
 
@@ -1176,343 +1213,6 @@ body.focus-mode .focus-toggle {
 
 
 /* ============================================ */
-/* ====== صفحه چت روم ========================= */
-/* ============================================ */
-
-.chat-page {
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 2rem 2rem 4rem;
-}
-
-.chat-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.chat-header h1 {
-    font-family: 'Lalezar', cursive;
-    font-size: 2rem;
-    font-weight: 400;
-    color: var(--text);
-    letter-spacing: 1px;
-    margin-bottom: 0.5rem;
-}
-
-.chat-header p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 0.75rem;
-}
-
-.chat-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    padding: 0.3rem 0.9rem;
-    border-radius: 999px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #888;
-}
-
-.status-dot.online {
-    background: #6ec98a;
-}
-
-.chat-container {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 380px);
-    min-height: 400px;
-}
-
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    -webkit-overflow-scrolling: touch;
-}
-
-.chat-messages::-webkit-scrollbar {
-    width: 6px;
-}
-
-.chat-messages::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.chat-messages::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-}
-
-.chat-message {
-    max-width: 80%;
-    padding: 0.65rem 1rem;
-    border-radius: 14px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    align-self: flex-start;
-    animation: messageFade 0.2s ease;
-}
-
-@keyframes messageFade {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.chat-message.mine {
-    align-self: flex-end;
-    background: linear-gradient(135deg, var(--purple-deep), var(--purple));
-    border-color: transparent;
-}
-
-.chat-message-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.2rem;
-}
-
-/* 👇 اسم کوچیک‌تر */
-.chat-message-name {
-    font-weight: 500;
-    font-size: 0.7rem;
-    color: var(--purple);
-    opacity: 0.9;
-}
-
-.chat-message.mine .chat-message-name {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-/* 👇 ساعت کوچیک‌تر */
-.chat-message-time {
-    color: var(--text-muted);
-    font-size: 0.65rem;
-    opacity: 0.65;
-}
-
-.chat-message.mine .chat-message-time {
-    color: rgba(255, 255, 255, 0.65);
-}
-
-.chat-message-content {
-    font-size: 0.9rem;
-    line-height: 1.7;
-    color: var(--text);
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-.chat-message.mine .chat-message-content {
-    color: white;
-}
-
-.chat-form {
-    border-top: 1px solid var(--border);
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    background: var(--bg-card);
-}
-
-.chat-form-row {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.chat-form-main {
-    align-items: stretch;
-}
-
-.chat-form input {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 0.7rem 1rem;
-    color: var(--text);
-    font-family: 'Vazirmatn', sans-serif;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.15s;
-    width: 100%;
-}
-
-.chat-form input:focus {
-    border-color: var(--purple-deep);
-}
-
-.chat-send-btn {
-    background: linear-gradient(135deg, var(--purple-deep), var(--purple));
-    border: none;
-    border-radius: 12px;
-    color: white;
-    width: 48px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.15s;
-}
-
-.chat-send-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-}
-
-.chat-send-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.chat-send-btn svg {
-    width: 20px;
-    height: 20px;
-}
-
-
-/* ============================================ */
-/* ====== صفحه ورود چت ======================== */
-/* ============================================ */
-
-.chat-auth {
-    min-height: 60vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-}
-
-.chat-auth-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 2.5rem;
-    width: 100%;
-    max-width: 420px;
-}
-
-.chat-auth-box h2 {
-    font-family: 'Lalezar', cursive;
-    font-size: 1.8rem;
-    font-weight: 400;
-    text-align: center;
-    margin-bottom: 0.5rem;
-    letter-spacing: 1px;
-}
-
-.chat-auth-sub {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.8;
-}
-
-.chat-auth-sub strong {
-    color: var(--purple);
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.chat-back-btn {
-    display: block;
-    margin: 1rem auto 0;
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-family: 'Vazirmatn', sans-serif;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: color 0.15s;
-    padding: 0.5rem;
-}
-
-.chat-back-btn:hover {
-    color: var(--purple);
-}
-
-
-/* ============================================ */
-/* ====== نوار کاربر در چت ==================== */
-/* ============================================ */
-
-.chat-user-bar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin: 1rem auto;
-    padding: 0.7rem 1rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    max-width: 400px;
-}
-
-.chat-user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    flex: 1;
-    min-width: 0;
-    text-align: right;
-}
-
-.chat-user-info strong {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.chat-user-email {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    opacity: 0.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-}
-
-.chat-logout {
-    font-size: 0.75rem !important;
-    padding: 0.35rem 0.8rem !important;
-    flex-shrink: 0;
-}
-
-
-/* ============================================ */
 /* ====== ریسپانسیو =========================== */
 /* ============================================ */
 
@@ -1563,47 +1263,6 @@ body.focus-mode .focus-toggle {
         left: 1rem;
         width: 42px;
         height: 42px;
-    }
-
-    .chat-page {
-        padding: 1.5rem 1rem 3rem;
-    }
-
-    .chat-header h1 {
-        font-size: 1.6rem;
-    }
-
-    .chat-container {
-        height: calc(100vh - 320px);
-        min-height: 350px;
-    }
-
-    .chat-messages {
-        padding: 1rem;
-    }
-
-    .chat-message {
-        max-width: 88%;
-    }
-
-    .chat-form {
-        padding: 0.75rem;
-    }
-
-    .chat-auth-box {
-        padding: 2rem 1.5rem;
-    }
-
-    .chat-user-bar {
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: 0.8rem;
-        border-radius: 14px;
-    }
-
-    .chat-user-info {
-        align-items: center;
-        text-align: center;
     }
 }
 
